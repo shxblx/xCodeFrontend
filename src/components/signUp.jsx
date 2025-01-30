@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { signup } from "../api/user";
 import toast from "react-hot-toast";
+import { setUserInfo } from "../redux/slices/userSlice";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +22,8 @@ const SignUp = () => {
 
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -86,7 +91,19 @@ const SignUp = () => {
     try {
       const { confirmPassword, ...signUpData } = formData;
       const response = await signup(signUpData);
-      toast.error(response.data.message);
+      console.log(response);
+      if (response.status === 200) {
+        dispatch(
+          setUserInfo({
+            user: "User",
+            userId: response.data.userId,
+          })
+        );
+        navigate("/home");
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.status);
+      }
     } catch (error) {
       setSubmitError(error.message || "An error occurred during sign up");
     } finally {

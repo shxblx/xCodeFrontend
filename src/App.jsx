@@ -1,11 +1,11 @@
-import { Toaster } from "react-hot-toast";
-import SignUp from "./components/signUp";
+import { BrowserRouter } from "react-router-dom";
+import { AppRouter } from "./router/AppRouter";
 
 function App() {
   return (
-    <>
-      <SignUp />
-    </>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   );
 }
 
