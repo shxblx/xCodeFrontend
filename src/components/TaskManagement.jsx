@@ -1,142 +1,230 @@
 import React, { useState } from "react";
+import { Plus, Flag, Edit2, Trash2, Eye, X } from "lucide-react";
 
-const TaskManagement = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    dueDate: "",
-    status: "Pending",
-  });
-  const [editTaskId, setEditTaskId] = useState(null);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
-  };
-
-  const saveTask = (e) => {
-    e.preventDefault();
-    if (editTaskId !== null) {
-      const updatedTasks = tasks.map((task) =>
-        task.id === editTaskId ? { ...task, ...newTask } : task
-      );
-      setTasks(updatedTasks);
-      setEditTaskId(null);
-    } else {
-      const task = { ...newTask, id: Date.now() };
-      setTasks([...tasks, task]);
-    }
-    setNewTask({ title: "", description: "", dueDate: "", status: "Pending" });
-  };
-
-  const editTask = (task) => {
-    setNewTask(task);
-    setEditTaskId(task.id);
-  };
-
-  const deleteTask = (taskId) => {
-    const updatedTasks = tasks.filter((task) => task.id !== taskId);
-    setTasks(updatedTasks);
-  };
+const Modal = ({ isOpen, onClose, children, title }) => {
+  if (!isOpen) return null;
 
   return (
-    <div className="min-h-screen bg-green-950 text-white p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Task Management</h1>
-
-      <form
-        onSubmit={saveTask}
-        className="mb-8 p-6 bg-green-900 rounded-lg shadow-lg"
-      >
-        <h2 className="text-xl font-semibold mb-4">
-          {editTaskId !== null ? "Edit Task" : "Create New Task"}
-        </h2>
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="title"
-            placeholder="Title"
-            value={newTask.title}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-green-800 text-white placeholder-green-300"
-            required
-          />
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={newTask.description}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-green-800 text-white placeholder-green-300"
-            required
-          />
-          <input
-            type="date"
-            name="dueDate"
-            value={newTask.dueDate}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-green-800 text-white"
-            required
-          />
-          <select
-            name="status"
-            value={newTask.status}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-green-800 text-white"
-          >
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <button
-            type="submit"
-            className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-600 transition duration-300"
-          >
-            {editTaskId !== null ? "Update Task" : "Add Task"}
+    <div className="fixed  inset-0 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-[#61677A] text-white rounded-lg p-6 w-full max-w-md m-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">{title}</h2>
+          <button onClick={onClose} className="text-white hover:text-gray-300">
+            <X size={20} />
           </button>
         </div>
-      </form>
-
-      <div className="space-y-4">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="p-4 bg-green-900 rounded-lg shadow-lg flex justify-between items-center"
-          >
-            <div>
-              <h3 className="text-xl font-semibold">{task.title}</h3>
-              <p className="text-green-300">{task.description}</p>
-              <p className="text-green-400">Due: {task.dueDate}</p>
-              <p
-                className={`text-sm font-semibold ${
-                  task.status === "Completed"
-                    ? "text-green-500"
-                    : task.status === "In Progress"
-                    ? "text-yellow-500"
-                    : "text-red-500"
-                }`}
-              >
-                Status: {task.status}
-              </p>
-            </div>
-            <div className="space-x-2">
-              <button
-                onClick={() => editTask(task)}
-                className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+        {children}
       </div>
     </div>
   );
 };
 
-export default TaskManagement;
+const TaskManager = () => {
+  const [tasks, setTasks] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [viewingTask, setViewingTask] = useState(null);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    dueDate: "",
+    status: "pending",
+  });
+
+  const addTask = () => {
+    if (editingTask) {
+      setTasks(
+        tasks.map((task) =>
+          task.id === editingTask.id ? { ...newTask, id: task.id } : task
+        )
+      );
+      setEditingTask(null);
+    } else {
+      setTasks([...tasks, { ...newTask, id: Date.now() }]);
+    }
+    setNewTask({ title: "", description: "", dueDate: "", status: "pending" });
+    setIsModalOpen(false);
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  const startEdit = (task) => {
+    setEditingTask(task);
+    setNewTask(task);
+    setIsModalOpen(true);
+  };
+
+  const getUpcomingTasks = () => {
+    return tasks.filter((task) => {
+      const dueDate = new Date(task.dueDate);
+      const today = new Date();
+      const diffTime = dueDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays >= 0 && diffDays <= 7;
+    });
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row gap-6 p-6 min-h-screen bg-[#272829]">
+      <div className="w-full md:w-2/3">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-white">Task Manager</h1>
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setNewTask({
+                title: "",
+                description: "",
+                dueDate: "",
+                status: "pending",
+              });
+              setIsModalOpen(true);
+            }}
+            className="bg-[#61677A] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90"
+          >
+            <Plus size={20} />
+            Add Task
+          </button>
+        </div>
+
+        <div className="grid gap-4">
+          {tasks.map((task) => (
+            <div key={task.id} className="bg-[#61677A] p-4 rounded-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-white font-semibold">{task.title}</h3>
+                  <p className="text-gray-200 text-sm mt-1">
+                    {task.description}
+                  </p>
+                  <div className="mt-2 text-sm text-gray-200">
+                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                  </div>
+                  <span className="inline-block mt-2 px-2 py-1 text-xs rounded bg-white text-[#61677A]">
+                    {task.status}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewingTask(task)}
+                    className="p-2 rounded bg-white/10 hover:bg-white/20"
+                  >
+                    <Eye size={16} className="text-white" />
+                  </button>
+                  <button
+                    onClick={() => startEdit(task)}
+                    className="p-2 rounded bg-white/10 hover:bg-white/20"
+                  >
+                    <Edit2 size={16} className="text-white" />
+                  </button>
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="p-2 rounded bg-white/10 hover:bg-white/20"
+                  >
+                    <Trash2 size={16} className="text-white" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="w-full md:w-1/3">
+        <div className="bg-[#61677A] p-4 rounded-lg">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Flag size={20} />
+            Upcoming Tasks
+          </h2>
+          <div className="space-y-4">
+            {getUpcomingTasks().map((task) => (
+              <div key={task.id} className="bg-white/10 p-3 rounded">
+                <h4 className="text-white font-medium">{task.title}</h4>
+                <p className="text-sm text-gray-200 mt-1">
+                  Due: {new Date(task.dueDate).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingTask ? "Edit Task" : "Add New Task"}
+      >
+        <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Task Title"
+            value={newTask.title}
+            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+            className="w-full p-2 rounded bg-[#61677A] text-white placeholder-gray-300"
+          />
+          <textarea
+            placeholder="Description"
+            value={newTask.description}
+            onChange={(e) =>
+              setNewTask({ ...newTask, description: e.target.value })
+            }
+            className="w-full p-2 rounded bg-[#61677A] text-white placeholder-gray-300"
+          />
+          <input
+            type="date"
+            value={newTask.dueDate}
+            onChange={(e) =>
+              setNewTask({ ...newTask, dueDate: e.target.value })
+            }
+            className="w-full p-2 rounded bg-[#61677A] text-white"
+          />
+          <select
+            value={newTask.status}
+            onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+            className="w-full p-2 rounded bg-[#61677A] text-white"
+          >
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 rounded bg-gray-600 text-white hover:opacity-90"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={addTask}
+              className="px-4 py-2 rounded bg-[#61677A] text-white hover:opacity-90"
+            >
+              {editingTask ? "Update" : "Add"} Task
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!viewingTask}
+        onClose={() => setViewingTask(null)}
+        title="Task Details"
+      >
+        {viewingTask && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold">{viewingTask.title}</h3>
+            <p className="text-gray-200">{viewingTask.description}</p>
+            <div className="text-sm text-gray-200">
+              Due: {new Date(viewingTask.dueDate).toLocaleDateString()}
+            </div>
+            <div className="inline-block px-2 py-1 rounded bg-[#61677A] text-white">
+              {viewingTask.status}
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+export default TaskManager;
