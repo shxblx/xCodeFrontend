@@ -1,5 +1,5 @@
 import React from "react";
-import SignUp from "../components/SignUp.jsx";
+import SignUp from "../components/Signup.jsx";
 import { Route, Routes } from "react-router-dom";
 import TaskManagement from "../components/TaskManagement.jsx";
 
