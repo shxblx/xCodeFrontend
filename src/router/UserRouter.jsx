@@ -1,7 +1,7 @@
 import React from "react";
-import Signup from "../components/Signup.jsx"; 
+import Signup from "../components/Signup"; 
 import { Route, Routes } from "react-router-dom";
-import TaskManagement from "../components/TaskManager.jsx";
+import TaskManagement from "../components/TaskManager";
 
 const UserRouter = () => {
   return (
