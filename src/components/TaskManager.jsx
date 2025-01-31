@@ -69,8 +69,8 @@ const TaskManager = () => {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logging out...");
+    dispatch(removeUserInfo());
+    navigate("/signup");
   };
 
   const deleteTask = (id) => {
@@ -155,36 +155,40 @@ const TaskManager = () => {
                 >
                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold">{task.title}</h3>
-                      <p className="text-gray-200 text-sm mt-1">
+                      <h3 className="text-2xl text-white font-semibold mb-2">
+                        {task.title}
+                      </h3>
+                      <p className="text-gray-200 text-sm mb-2">
                         {task.description}
                       </p>
-                      <div className="mt-2 text-sm text-gray-200">
+                      <div className="text-sm text-gray-200">
                         Due: {new Date(task.dueDate).toLocaleDateString()}
                       </div>
-                      <span className="inline-block mt-2 px-2 py-1 text-xs rounded bg-white text-[#61677A]">
+                    </div>
+                    <div className="flex flex-col items-end gap-4">
+                      <span className="inline-block px-3 py-1 text-lg rounded bg-white text-[#61677A]">
                         {task.status}
                       </span>
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                      <button
-                        onClick={() => setViewingTask(task)}
-                        className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
-                      >
-                        <Eye size={16} className="text-white" />
-                      </button>
-                      <button
-                        onClick={() => startEdit(task)}
-                        className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
-                      >
-                        <Edit2 size={16} className="text-white" />
-                      </button>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
-                      >
-                        <Trash2 size={16} className="text-white" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setViewingTask(task)}
+                          className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                        >
+                          <Eye size={16} className="text-white" />
+                        </button>
+                        <button
+                          onClick={() => startEdit(task)}
+                          className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                        >
+                          <Edit2 size={16} className="text-white" />
+                        </button>
+                        <button
+                          onClick={() => deleteTask(task.id)}
+                          className="p-2 rounded bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                        >
+                          <Trash2 size={16} className="text-white" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -193,7 +197,6 @@ const TaskManager = () => {
           )}
         </div>
 
-        {/* Desktop Upcoming Tasks */}
         <div className="hidden md:block w-full md:w-4/13 fixed right-6 top-30 bottom-6 overflow-auto">
           <div className="bg-[#61677A] p-4 rounded-lg">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -219,7 +222,6 @@ const TaskManager = () => {
           </div>
         </div>
 
-        {/* Mobile Upcoming Tasks Modal */}
         <Modal
           isOpen={showUpcoming}
           onClose={() => setShowUpcoming(false)}
@@ -243,7 +245,6 @@ const TaskManager = () => {
           </div>
         </Modal>
 
-        {/* Add/Edit Task Modal */}
         <Modal
           isOpen={isModalOpen}
           onClose={() => {
@@ -335,7 +336,6 @@ const TaskManager = () => {
           </div>
         </Modal>
 
-        {/* View Task Modal */}
         <Modal
           isOpen={!!viewingTask}
           onClose={() => setViewingTask(null)}
@@ -343,12 +343,12 @@ const TaskManager = () => {
         >
           {viewingTask && (
             <div className="space-y-4">
-              <h3 className="text-xl font-bold">{viewingTask.title}</h3>
+              <h3 className="text-2xl font-bold">{viewingTask.title}</h3>
               <p className="text-gray-200">{viewingTask.description}</p>
               <div className="text-sm text-gray-200">
                 Due: {new Date(viewingTask.dueDate).toLocaleDateString()}
               </div>
-              <div className="inline-block px-2 py-1 rounded bg-white text-[#61677A]">
+              <div className="inline-block px-3 py-1 text-lg rounded bg-white text-[#61677A]">
                 {viewingTask.status}
               </div>
             </div>
