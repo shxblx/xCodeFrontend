@@ -5,7 +5,7 @@ import { setUserInfo } from "../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-const SignUp = () => {
+const Signup = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -240,4 +240,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Signup;
