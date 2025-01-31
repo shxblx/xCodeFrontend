@@ -1,23 +1,19 @@
 import React, { useState } from "react";
-import { signup } from "../api/user";
+import { login } from "../api/user";
 import toast from "react-hot-toast";
 import { setUserInfo } from "../redux/slices/userSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-const Signup = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,11 +30,6 @@ const Signup = () => {
     let error = "";
 
     switch (name) {
-      case "username":
-        if (value.length < 3) {
-          error = "Username must be at least 3 characters long";
-        }
-        break;
       case "email":
         if (!validateEmail(value)) {
           error = "Please enter a valid email address";
@@ -47,11 +38,6 @@ const Signup = () => {
       case "password":
         if (value.length < 8) {
           error = "Password must be at least 8 characters long";
-        }
-        break;
-      case "confirmPassword":
-        if (value !== formData.password) {
-          error = "Passwords do not match";
         }
         break;
       default:
@@ -70,27 +56,16 @@ const Signup = () => {
     e.preventDefault();
     setSubmitError("");
 
-    const isUsernameValid = validateField("username", formData.username);
     const isEmailValid = validateField("email", formData.email);
     const isPasswordValid = validateField("password", formData.password);
-    const isConfirmPasswordValid = validateField(
-      "confirmPassword",
-      formData.confirmPassword
-    );
 
-    if (
-      !isUsernameValid ||
-      !isEmailValid ||
-      !isPasswordValid ||
-      !isConfirmPasswordValid
-    ) {
+    if (!isEmailValid || !isPasswordValid) {
       return;
     }
 
     setLoading(true);
     try {
-      const { confirmPassword, ...signUpData } = formData;
-      const response = await signup(signUpData);
+      const response = await login(formData);
       if (response.status === 200) {
         dispatch(
           setUserInfo({
@@ -99,12 +74,12 @@ const Signup = () => {
           })
         );
         navigate("/home");
-        toast.success(response.data.message);
+        toast.success("Login successful!");
       } else {
-        toast.error(response.data.status);
+        toast.error(response.data.message);
       }
     } catch (error) {
-      setSubmitError(error.message || "An error occurred during sign up");
+      setSubmitError(error.message || "An error occurred during login");
     } finally {
       setLoading(false);
     }
@@ -124,12 +99,10 @@ const Signup = () => {
       {/* Left Side - Slogan */}
       <div className="hidden lg:flex w-1/2 items-center justify-center p-12 bg-[#61677A]">
         <div className="max-w-md">
-          <h1 className="text-5xl font-bold text-white mb-6">
-            Organize Your Work
-          </h1>
+          <h1 className="text-5xl font-bold text-white mb-6">Welcome Back!</h1>
           <p className="text-xl text-white/80">
-            Create an account and start managing your tasks efficiently. Join
-            thousands of productive users today!
+            Sign in to continue managing your tasks and stay productive. Your
+            organized life awaits!
           </p>
         </div>
       </div>
@@ -138,7 +111,7 @@ const Signup = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md bg-[#61677A] rounded-xl p-8 shadow-lg">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
-            Create Account
+            Login to Continue
           </h2>
 
           {submitError && (
@@ -148,28 +121,6 @@ const Signup = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-white text-sm font-medium mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg bg-white/10 backdrop-blur-sm border ${
-                  errors.username
-                    ? "border-red-500"
-                    : "border-white/20 focus:border-white/50"
-                } text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30`}
-                placeholder="Enter your username"
-                required
-              />
-              {errors.username && (
-                <p className="text-red-300 text-xs mt-2">{errors.username}</p>
-              )}
-            </div>
-
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Email
@@ -206,35 +157,11 @@ const Signup = () => {
                     ? "border-red-500"
                     : "border-white/20 focus:border-white/50"
                 } text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30`}
-                placeholder="Create password"
+                placeholder="Enter your password"
                 required
               />
               {errors.password && (
                 <p className="text-red-300 text-xs mt-2">{errors.password}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-white text-sm font-medium mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg bg-white/10 backdrop-blur-sm border ${
-                  errors.confirmPassword
-                    ? "border-red-500"
-                    : "border-white/20 focus:border-white/50"
-                } text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30`}
-                placeholder="Confirm password"
-                required
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-300 text-xs mt-2">
-                  {errors.confirmPassword}
-                </p>
               )}
             </div>
 
@@ -243,16 +170,16 @@ const Signup = () => {
               disabled={loading}
               className="w-full bg-white text-[#272829] py-3 px-6 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#61677A] disabled:opacity-50"
             >
-              {loading ? "Creating Account..." : "Sign Up"}
+              {loading ? "Logging In..." : "Login"}
             </button>
 
             <p className="text-center text-white/80 text-sm mt-6">
-              Already have an account?{" "}
+              Don't have an account?{" "}
               <Link
-                to="/login"
+                to="/signup"
                 className="text-white font-semibold hover:text-white/80 transition-colors"
               >
-                Log in here
+                Sign up here
               </Link>
             </p>
           </form>
@@ -262,4 +189,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Login;

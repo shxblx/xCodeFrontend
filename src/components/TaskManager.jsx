@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Plus, Flag, Edit2, Trash2, Eye } from "lucide-react";
 import Navbar from "./Navbar";
 import Modal from "./Modal";
+import { removeUserInfo } from "../redux/slices/userSlice";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const EmptyState = ({ onAddTask }) => {
   return (
@@ -36,6 +39,8 @@ const TaskManager = () => {
     dueDate: "",
     status: "pending",
   });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const errors = {};
